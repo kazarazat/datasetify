@@ -7,7 +7,7 @@ Automatically create a dataset of NLP features from a plain text file
 In my work as an NLP developer and as a Data Science student at the University of Washington I often find myself in need of datasets that extract preliminary NLP features from text like sentiment, typology and useful
 grammar patterns. This simple project can extract those features from any plain text and create a CSV file for you. If you're working with larger text corpura it might be helpful to instantiate multiple classes and use multithreading. 
 
-  - Create a csv file suitable for data science experiments of process text
+  - Create a csv file suitable for data science experiments of processed text
   - extract relevant NLP features from a text
 
 ### Installation
