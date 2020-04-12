@@ -15,7 +15,7 @@ def get_sentiment(sentence):
 def get_typology(sentence):
 	"""
 	takes word tokens as input
-	returns a dictionary object with usefule nlp data
+	returns a dictionary object with useful nlp data
 	"""
 	def grammar_length():
 		t = remove_punc(sentence)
@@ -73,7 +73,7 @@ class ProcessedText():
 		grammar = pos_tag(word_tokenize(remove_punc(text)))
 		words = self.get_word_tokens(remove_punc(text))
 		op = {}
-		op['Word Count'] = len(words)
+		op['WordCount'] = len(words)
 		op['Nouns'] = self.get_noun_count(grammar)
 		op["Verbs"] = self.get_verb_count(grammar)
 		op["Typology"] = get_typology(text)
