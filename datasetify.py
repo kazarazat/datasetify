@@ -1,7 +1,4 @@
 #!/usr/bin/python3
-import requests, string, unicodedata
-from time import time
-import json
 import re
 import nltk
 from nltk import pos_tag,word_tokenize,sent_tokenize
@@ -54,11 +51,6 @@ def get_typology(sentence):
 
 	return check_order(grammar_length())
 
-
-with open("games-corpus.txt", "r") as r:
-	data = r.read()
-
-
 class ProcessedText():
 
 	def __init__(self):
@@ -89,7 +81,7 @@ class ProcessedText():
 		return op
 
 def create_dataset(file_path,output_name="summary"):
-	with open("games-corpus.txt", "r") as file:
+	with open(file_path, "r") as file:
 		text = file.read()
 
 	sentences = sent_tokenize(text)
@@ -108,5 +100,5 @@ def create_dataset(file_path,output_name="summary"):
 	print (df.head(10))
 	return
 
-create_dataset("games-corpus.txt")
+create_dataset("summary.txt")
 
