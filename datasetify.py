@@ -6,7 +6,7 @@ from textblob import TextBlob
 import pandas as pd
 
 def remove_punc(sentence):
-    return re.sub(r'[^\w\s]','',sentence).lower()
+    return re.sub(r'[^\w\s]',' ',sentence).lower()
 
 def get_sentiment(sentence):
 	a = TextBlob(sentence)
@@ -17,39 +17,39 @@ def get_typology(sentence):
 	takes word tokens as input
 	returns a dictionary object with useful nlp data
 	"""
-	def grammar_length():
+	def index_sent_tokens(sent):
 		t = remove_punc(sentence)
 		tt = pos_tag(word_tokenize(t))
 		index_list = [tt.index(item) for item in tt]
 		tag_list = [tag[1] for tag in tt]
 		return zip(index_list,tag_list)
 
-	def check_order(grammar_array):
-		g = grammar_array
-		nn = ['NN','NNS','PRP','NNP','PRP']
-		vb = ['VB','VBD','VBZ','VBG','VBN']
-		try:
-			verb_ = [item[0] for item in g if item[1] in vb][0]
-		except:
-			verb_ = 0
-		try:
-			subject_ = [item[0] for item in g if item[1] in nn][0]
-		except:
-			subject_ = 0
-		try:
-			object_  = [item[0] for item in g if item[1] in nn][-1]
-		except:
-			object_ = 0
-		group = [[subject_,'S'],[verb_,'V'],[object_,'O']]
-		try:
-			raw_order = sorted(group, key=lambda x: x[0])
-		except:
-			return {"typology":'UNK'}
-		else:
-			typepology = "".join([item[1] for item in raw_order])
-		return typepology
+	sent_idx = list(index_sent_tokens(sentence))
+	verb_tags = ['VB','VBD','VBZ','VBG','VBN']
+	noun_tags = ['NN','NNS','PRP','NNP','PRP']
+	typology = "UNK"
 
-	return check_order(grammar_length())
+	try:
+		subject_ = [item[0] for item in sent_idx if item[1] in noun_tags][0]
+		object_ = [item[0] for item in sent_idx if item[1] in noun_tags][-1]
+		verb_ = [item[0] for item in sent_idx if item[1] in verb_tags][0]
+		if subject_ < verb_:
+			typology = "SVO"
+		if subject_ < object_:
+			if object_ < verb_:
+				typology = "SOV"
+	except:
+		typology = "-SVO"
+
+	return typology
+
+def categorize_length(word_count):
+		if 0 < word_count < 12:
+			return "short"
+		if word_count > 20:
+			return "long"
+		else:
+			return "medium"
 
 class ProcessedText():
 
@@ -69,15 +69,17 @@ class ProcessedText():
 		v = [item[1] for item in g if item[1] in vb]
 		return len(v)
 
+
 	def result(self,text):
 		grammar = pos_tag(word_tokenize(remove_punc(text)))
 		words = self.get_word_tokens(remove_punc(text))
 		op = {}
-		op['WordCount'] = len(words)
+		op['Sentence Length'] = categorize_length(len(words))
+		op['Word Count'] = len(words)
 		op['Nouns'] = self.get_noun_count(grammar)
 		op["Verbs"] = self.get_verb_count(grammar)
 		op["Typology"] = get_typology(text)
-		op["Sentiment"] = get_sentiment(text)
+		#op["Sentiment"] = get_sentiment(text)
 		return op
 
 def create_dataset(file_path,output_name="summary"):
@@ -100,5 +102,14 @@ def create_dataset(file_path,output_name="summary"):
 	print (df.head(10))
 	return
 
-create_dataset("summary.txt")
+
+def grammar_length(sentence):
+	t = remove_punc(sentence)
+	tt = pos_tag(word_tokenize(t))
+	index_list = [tt.index(item) for item in tt]
+	tag_list = [tag[1] for tag in tt]
+	return zip(index_list,tag_list)
+
+
+print(create_dataset('summary.txt'))
 
