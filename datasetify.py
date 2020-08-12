@@ -27,7 +27,7 @@ def get_typology(sentence):
 	sent_idx = list(index_sent_tokens(sentence))
 	verb_tags = ['VB','VBD','VBZ','VBG','VBN']
 	noun_tags = ['NN','NNS','PRP','NNP','PRP']
-	typology = "UNK"
+	typology = "Not SVO"
 
 	try:
 		subject_ = [item[0] for item in sent_idx if item[1] in noun_tags][0]
@@ -35,21 +35,35 @@ def get_typology(sentence):
 		verb_ = [item[0] for item in sent_idx if item[1] in verb_tags][0]
 		if subject_ < verb_:
 			typology = "SVO"
-		if subject_ < object_:
-			if object_ < verb_:
-				typology = "SOV"
+		else:
+			typology = "Not SVO"
+		# if subject_ < object_:
+		# 	if object_ < verb_:
+		# 		typology = "SOV"
 	except:
-		typology = "-SVO"
+		typology = "Not SVO"
 
 	return typology
 
 def categorize_length(word_count):
-		if 0 < word_count < 12:
-			return "short"
-		if word_count > 20:
-			return "long"
+		if 0 < word_count < 14:
+			return "low"
+		if word_count >= 14:
+			return "high"
 		else:
-			return "medium"
+			return "low"
+
+def categorize_verbs(verb_count):
+		if verb_count <= 1:
+			return "low"
+		else:
+			return "high"
+
+def categorize_nouns(noun_count):
+		if noun_count <= 4:
+			return "low"
+		else:
+			return "high"
 
 class ProcessedText():
 
@@ -74,10 +88,9 @@ class ProcessedText():
 		grammar = pos_tag(word_tokenize(remove_punc(text)))
 		words = self.get_word_tokens(remove_punc(text))
 		op = {}
-		op['Sentence Length'] = categorize_length(len(words))
-		op['Word Count'] = len(words)
-		op['Nouns'] = self.get_noun_count(grammar)
-		op["Verbs"] = self.get_verb_count(grammar)
+		op['Word Count'] = categorize_length(len(words))
+		op['Noun Count'] = categorize_nouns(self.get_noun_count(grammar))
+		op["Verb Count"] = categorize_verbs(self.get_verb_count(grammar))
 		op["Typology"] = get_typology(text)
 		#op["Sentiment"] = get_sentiment(text)
 		return op
