@@ -12,6 +12,17 @@ def get_sentiment(sentence):
 	a = TextBlob(sentence)
 	return round(a.sentiment[0],4)
 
+def get_diversity(sentence):
+		t = remove_punc(sentence)
+		tt = pos_tag(word_tokenize(t))
+		tags = [t[1] for t in tt]
+		sent_len = len(tags)
+		uniques = list(set(tags))
+		if len(uniques) / sent_len > 0.35:
+			return 'high'
+		else:
+			return 'low'
+
 def get_typology(sentence):
 	"""
 	takes word tokens as input
@@ -27,21 +38,21 @@ def get_typology(sentence):
 	sent_idx = list(index_sent_tokens(sentence))
 	verb_tags = ['VB','VBD','VBZ','VBG','VBN']
 	noun_tags = ['NN','NNS','PRP','NNP','PRP']
-	typology = "Not SVO"
+	typology = "low"
 
 	try:
 		subject_ = [item[0] for item in sent_idx if item[1] in noun_tags][0]
 		object_ = [item[0] for item in sent_idx if item[1] in noun_tags][-1]
 		verb_ = [item[0] for item in sent_idx if item[1] in verb_tags][0]
 		if subject_ < verb_:
-			typology = "SVO"
+			typology = "high"
 		else:
-			typology = "Not SVO"
+			typology = "low"
 		# if subject_ < object_:
 		# 	if object_ < verb_:
 		# 		typology = "SOV"
 	except:
-		typology = "Not SVO"
+		typology = "low"
 
 	return typology
 
@@ -88,10 +99,34 @@ class ProcessedText():
 		grammar = pos_tag(word_tokenize(remove_punc(text)))
 		words = self.get_word_tokens(remove_punc(text))
 		op = {}
-		op['Word Count'] = categorize_length(len(words))
-		op['Noun Count'] = categorize_nouns(self.get_noun_count(grammar))
-		op["Verb Count"] = categorize_verbs(self.get_verb_count(grammar))
-		op["Typology"] = get_typology(text)
+		attributes = []
+
+		att1 = categorize_length(len(words))
+		attributes.append(att1)
+		op['Word Count'] = att1
+
+		att2 = categorize_nouns(self.get_noun_count(grammar))
+		attributes.append(att2)
+		op['Noun Count'] = att2
+
+		att3 = categorize_verbs(self.get_verb_count(grammar))
+		attributes.append(att3)
+		op["Verb Count"] = att3
+
+		att4 = get_typology(text)
+		attributes.append(att4)
+		op["SVO Chance"] = att4
+
+		att5 = get_diversity(text)
+		attributes.append(att5)
+		op["Diversity"] = att5
+
+		label = 'bad'
+		high_count = [att for att in attributes if att=='high']
+		if len(high_count) >= 3:
+			label = 'good'
+		op["Label"] = label
+
 		#op["Sentiment"] = get_sentiment(text)
 		return op
 
@@ -116,12 +151,6 @@ def create_dataset(file_path,output_name="summary"):
 	return
 
 
-def grammar_length(sentence):
-	t = remove_punc(sentence)
-	tt = pos_tag(word_tokenize(t))
-	index_list = [tt.index(item) for item in tt]
-	tag_list = [tag[1] for tag in tt]
-	return zip(index_list,tag_list)
 
 
 print(create_dataset('summary.txt'))
