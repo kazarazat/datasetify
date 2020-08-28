@@ -18,7 +18,7 @@ def get_diversity(sentence):
 		tags = [t[1] for t in tt]
 		sent_len = len(tags)
 		uniques = list(set(tags))
-		if len(uniques) / sent_len > 0.35:
+		if len(uniques) / sent_len > 0.45:
 			return 'high'
 		else:
 			return 'low'
@@ -59,13 +59,13 @@ def get_typology(sentence):
 def categorize_length(word_count):
 		if 0 < word_count < 14:
 			return "low"
-		if word_count >= 14:
+		if word_count >= 16:
 			return "high"
 		else:
 			return "low"
 
 def categorize_verbs(verb_count):
-		if verb_count <= 1:
+		if verb_count <= 3:
 			return "low"
 		else:
 			return "high"
@@ -149,8 +149,6 @@ def create_dataset(file_path,output_name="summary"):
 	df.to_csv('csvs/{}-nlp-data.csv'.format(output_name), index=False, header=True)
 	print (df.head(10))
 	return
-
-
 
 
 print(create_dataset('summary.txt'))
